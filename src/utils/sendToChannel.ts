@@ -2,7 +2,7 @@ import { Guild, EmbedBuilder, TextChannel } from 'discord.js';
 import GuildConfig from '../models/GuildConfig';
 import { logger } from './logger';
 
-type ChannelType = 'applicationChannel' | 'logChannel' | 'adminChannel';
+type ChannelType =  'logChannel' | 'adminChannel';
 
 interface SendToChannelResult {
     success: boolean;
@@ -32,7 +32,6 @@ export async function sendToChannel(
         const channelIdMap: Record<ChannelType, string | undefined> = {
             logChannel: config.logChannelId ?? undefined,
             adminChannel: config.adminChannelId ?? undefined,
-            applicationChannel: config.applicationChannelId ?? undefined,
         };
 
         const channelId = channelIdMap[channelType];

@@ -3,7 +3,11 @@ import { Command } from "../types/Command";
 import { Modal } from "../types/Modal";
 
 export const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMembers
+    ],
 }) as Client & {
     commands: Collection<string, Command>;
     modals: Collection<string, Modal>;

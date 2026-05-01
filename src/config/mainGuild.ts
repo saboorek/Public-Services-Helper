@@ -1,0 +1,3 @@
+export const MAIN_GUILD_ID = [
+    "1328744413673029722", //SBRKCODE
+];
