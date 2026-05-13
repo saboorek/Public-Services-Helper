@@ -14,6 +14,13 @@ export interface IWarrantConfig extends Document {
         lifeImprisonmentChannelId?: string | null;
         judicialChannelId?: string | null;
         appOrderSaleChannelId?: string | null;
+    },
+    role: {
+        daoRoleId?: string | null;
+        criminalDivisionRoleId?: string | null;
+        leaderFbiRoleId?: string | null;
+        helperRoleId?: string | null;
+        supervisorRoleId?: string | null;
     }
 }
 
@@ -31,6 +38,13 @@ const WarrantConfigSchema = new Schema<IWarrantConfig>({
       lifeImprisonmentChannelId: { type: String, default: null },
       judicialChannelId: { type: String, default: null },
       appOrderSaleChannelId: { type: String, default: null },
+  },
+  role: {
+        daoRoleId: { type: String, default: null },
+        criminalDivisionRoleId: { type: String, default: null },
+        leaderFbiRoleId: { type: String, default: null },
+        helperRoleId: { type: String, default: null },
+        supervisorRoleId: { type: String, default: null },
   }
 })
 

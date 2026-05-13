@@ -21,6 +21,10 @@ export const setChannelSubcommand = {
                     .setRequired(true)
                     .addChoices(
                         {
+                        name: 'panel Channel',
+                        value: 'panelChannel'
+                        },
+                        {
                         name: 'Arrest Warrant',
                         value: 'arrestChannel'
                         },
@@ -53,7 +57,7 @@ export const setChannelSubcommand = {
                         value: 'judicialChannel'
                         },
                         {
-                        name: 'Application of Order of Sale (IRS)',
+                        name: 'Application for Order of Sale (IRS)',
                         value: 'appOrderSaleChannel'
                         },
                     )
@@ -85,6 +89,9 @@ export const setChannelSubcommand = {
             }
 
             switch ( channelType ) {
+                case 'panelChannel':
+                    config.panelChannelId = channel.id;
+                    break;
                 case 'arrestChannel':
                     config.warrants.arrestChannelId = channel.id;
                     break;
@@ -109,7 +116,7 @@ export const setChannelSubcommand = {
                 case 'judicialChannel':
                     config.warrants.judicialChannelId = channel.id;
                     break;
-                case 'AppOrderSaleChannel':
+                case 'appOrderSaleChannel':
                     config.warrants.appOrderSaleChannelId = channel.id;
                     break;
                 default:

@@ -7,7 +7,7 @@ export default {
     name: "guildMemberRemove",
     async execute(member: GuildMember | PartialGuildMember) {
         try {
-            // Znajdź wszystkie główne serwery, które mają to mapowanie
+
             const mappings = await RoleMapping.find({ targetGuildId: member.guild.id });
             const mainGuildIds = [...new Set(mappings.map(m => m.guildId))];
 

@@ -71,7 +71,7 @@ export const showChannelSubcommand = {
                         inline: false
                     },
                     {
-                        name: '🪙 Application of Order of Sale (IRS)',
+                        name: '🪙 Application for Order of Sale (IRS)',
                         value: config.warrants.appOrderSaleChannelId ? `<#${config.warrants.appOrderSaleChannelId}>` : 'Not set',
                         inline: false
                     },
