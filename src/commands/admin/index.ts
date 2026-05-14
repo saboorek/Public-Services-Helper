@@ -1,9 +1,9 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, MessageFlags} from 'discord.js';
 import { Command } from "../../types/Command";
 import { setChannelSubcommand } from "./setChannel";
-import { mapRoleSubcommand } from "./maprole";
+import { mapRoleSubcommand } from "./mapRole";
 import {setDefaultRoleSubcommand} from "./setDefaultRole";
-import {showRoleSubcommand} from "./showrole";
+import {showRoleSubcommand} from "./showRole";
 
 const adminCommand: Command = {
     data: new SlashCommandBuilder()

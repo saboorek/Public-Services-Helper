@@ -8,6 +8,22 @@ interface Button {
     execute: (interaction: ButtonInteraction) => Promise<void>;
 }
 
+function getButtonFiles(dir: string): string[] {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    const files: string[] = [];
+
+    for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+            files.push(...getButtonFiles(fullPath));
+        } else if ((entry.name.endsWith('.ts') || entry.name.endsWith('.js')) && !entry.name.endsWith('.d.ts')) {
+            files.push(fullPath);
+        }
+    }
+
+    return files;
+}
+
 export function loadButtons(client: Client): void {
     const buttonsPath = path.join(__dirname, "../buttons");
 
@@ -17,16 +33,12 @@ export function loadButtons(client: Client): void {
     }
 
     const buttons = new Collection<string, Button>();
-    const buttonFiles = fs.readdirSync(buttonsPath)
-        .filter(file => (file.endsWith(".ts") || file.endsWith(".js")) && !file.endsWith(".d.ts"));
 
     logger.info("🔄 Rozpoczynam ładowanie buttonów...");
 
-    for (const file of buttonFiles) {
-        const filePath = path.join(buttonsPath, file);
+    const buttonFiles = getButtonFiles(buttonsPath);
 
-        if (!fs.statSync(filePath).isFile()) continue;
-
+    for (const filePath of buttonFiles) {
         const buttonModule = require(filePath);
         const button: Button = buttonModule.default || Object.values(buttonModule).find((exp: any) => exp && "customId" in exp && "execute" in exp) as Button;
 
@@ -34,15 +46,14 @@ export function loadButtons(client: Client): void {
             buttons.set(button.customId, button);
             logger.success(`🟢 Załadowano button: ${button.customId}`);
         } else {
-            logger.warn(`⚠️ Button w pliku ${file} nie posiada wymaganych właściwości`);
+            logger.warn(`⚠️ Button w pliku ${filePath} nie posiada wymaganych właściwości`);
         }
     }
 
     client.on("interactionCreate", async (interaction) => {
         if (!interaction.isButton()) return;
 
-        // Obsługa dynamicznych customId (np. "deleteTicket:ticketId")
-        const baseCustomId = interaction.customId.split(":")[0];
+        const baseCustomId = interaction.customId.split(/[_:]/)[0];
         const button = buttons.get(baseCustomId) || buttons.get(interaction.customId);
 
         if (!button) return;

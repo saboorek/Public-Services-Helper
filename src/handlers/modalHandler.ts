@@ -8,6 +8,22 @@ interface Modal {
     execute: (interaction: ModalSubmitInteraction) => Promise<void>;
 }
 
+function getModalFiles(dir: string): string[] {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    const files: string[] = [];
+
+    for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+            files.push(...getModalFiles(fullPath));
+        } else if ((entry.name.endsWith('.ts') || entry.name.endsWith('.js')) && !entry.name.endsWith('.d.ts')) {
+            files.push(fullPath);
+        }
+    }
+
+    return files;
+}
+
 export function loadModals(client: Client): void {
     const modalsPath = path.join(__dirname, '../modals');
 
@@ -17,16 +33,12 @@ export function loadModals(client: Client): void {
     }
 
     const modals = new Collection<string, Modal>();
-    const modalFiles = fs.readdirSync(modalsPath)
-        .filter(file => (file.endsWith('.ts') || file.endsWith('.js')) && !file.endsWith('.d.ts'));
 
     logger.info(`🔄 Rozpoczynam ładowanie modali...`);
 
-    for (const file of modalFiles) {
-        const filePath = path.join(modalsPath, file);
+    const modalFiles = getModalFiles(modalsPath);
 
-        if (!fs.statSync(filePath).isFile()) continue;
-
+    for (const filePath of modalFiles) {
         const modalModule = require(filePath);
         const modal: Modal = modalModule.default || Object.values(modalModule).find((exp: any) => exp && 'customId' in exp && 'execute' in exp) as Modal;
 
@@ -34,15 +46,14 @@ export function loadModals(client: Client): void {
             modals.set(modal.customId, modal);
             logger.success(`🟢 Załadowano modal: ${modal.customId}`);
         } else {
-            logger.warn(`⚠️ Modal w pliku ${file} nie posiada wymaganych właściwości`);
+            logger.warn(`⚠️ Modal w pliku ${filePath} nie posiada wymaganych właściwości`);
         }
     }
 
     client.on('interactionCreate', async (interaction) => {
         if (!interaction.isModalSubmit()) return;
 
-        // Obsługa dynamicznych customId (np. "createTicketPanel:channelId")
-        const baseCustomId = interaction.customId.split(':')[0];
+        const baseCustomId = interaction.customId.split(/[_:]/)[0];
         const modal = modals.get(baseCustomId) || modals.get(interaction.customId);
 
         if (!modal) return;
