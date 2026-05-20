@@ -24,6 +24,7 @@ export const setRoleSubcommand = {
                         { name: '🏛️ Leader FBI', value: 'leaderFbiRole' },
                         { name: '🤝 Helper', value: 'helperRole' },
                         { name: '👔 Supervisor', value: 'supervisorRole' },
+                        { name: '🧑‍⚖️ LSC Superior Court', value: 'superiorCourtRole'}
                     )
             )
             .addRoleOption(option =>
@@ -61,6 +62,9 @@ export const setRoleSubcommand = {
                     break;
                 case 'supervisorRole':
                     config.role.supervisorRoleId = role.id;
+                    break;
+                case 'superiorCourtRole':
+                    config.role.superiorCourtRoleId = role.id;
                     break;
                 default:
                     await interaction.editReply({ content: '❌ Wybrano nieprawidłowy typ roli.' });

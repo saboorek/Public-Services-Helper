@@ -148,10 +148,18 @@ export const seizureWarrantModal = {
                     .setStyle(ButtonStyle.Danger)
             )
 
-            await seizureChannel.send({
+            const reviewMessage = await seizureChannel.send({
                 embeds: [reviewEmbed],
                 components: [row]
             });
+
+            await WarrantCase.updateOne(
+                { channelId: channel.id },
+                {
+                    reviewMessageId: reviewMessage.id,
+                    reviewChannelId: seizureChannel.id
+                }
+            )
 
             await interaction.editReply({
                 content: `✅ Wniosek został złożony. Kanał: <#${channel.id}>`

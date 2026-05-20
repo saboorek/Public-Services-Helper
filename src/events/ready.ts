@@ -2,6 +2,7 @@ import { Client } from "discord.js";
 import { logger } from '../utils/logger';
 import GuildConfig from '../models/GuildConfig';
 import { syncRoles } from '../utils/syncRoles';
+import { checkWarrantReminders } from '../utils/warrantReminder';
 
 export default {
     name: "ready",
@@ -33,5 +34,11 @@ export default {
         } catch (err) {
             logger.error(`❌ Błąd podczas startu synchronizacji: ${err}`);
         }
+
+        await checkWarrantReminders(client);
+        setInterval(async () => {
+            await checkWarrantReminders(client);
+        }, 12 * 60 * 60 * 1000);
+        logger.info("🔄 Uruchomiono cykliczne sprawdzanie przypomnień o wnioskach (co 12h)");
     },
 };

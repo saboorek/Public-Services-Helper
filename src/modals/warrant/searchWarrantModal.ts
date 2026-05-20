@@ -162,10 +162,18 @@ export const searchWarrantModal = {
                     .setStyle(ButtonStyle.Danger)
             );
 
-            await searchChannel.send({
+            const reviewMessage = await searchChannel.send({
                 embeds: [reviewEmbed],
                 components: [row]
             });
+
+            await WarrantCase.updateOne(
+                { channelId: channel.id },
+                {
+                    reviewMessageId: reviewMessage.id,
+                    reviewChannelId: searchChannel.id
+                }
+            )
 
             await interaction.editReply({
                 content: `✅ Wniosek został złożony. Kanał: <#${channel.id}>`

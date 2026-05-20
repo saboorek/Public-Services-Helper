@@ -153,10 +153,18 @@ export const wiretapWarrantModal = {
                     .setStyle(ButtonStyle.Danger)
             );
 
-            await channel.send({
+            const reviewMessage = await wiretapChannel.send({
                 embeds: [reviewEmbed],
                 components: [row]
             });
+
+            await WarrantCase.updateOne(
+                { channelId: channel.id },
+                {
+                    reviewMessageId: reviewMessage.id,
+                    reviewChannelId: wiretapChannel.id
+                }
+            )
 
             await interaction.editReply({
                 content: `✅ Wniosek został złożony. Kanał: <#${channel.id}>`

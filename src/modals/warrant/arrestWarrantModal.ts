@@ -157,10 +157,18 @@ export const arrestWarrantModal = {
                     .setStyle(ButtonStyle.Danger)
             );
 
-            await arrestChannel.send({
+            const reviewMessage = await arrestChannel.send({
                 embeds: [reviewEmbed],
                 components: [row]
             });
+
+            await WarrantCase.updateOne(
+                { channelId: channel.id },
+                {
+                    reviewMessageId: reviewMessage.id,
+                    reviewChannelId: arrestChannel.id
+                }
+            )
 
             await interaction.editReply({
                 content: `✅ Wniosek został złożony. Kanał: <#${channel.id}>`
