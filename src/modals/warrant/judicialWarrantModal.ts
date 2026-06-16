@@ -157,10 +157,18 @@ export const judicialWarrantModal = {
                     .setLabel('Odrzuć')
                     .setStyle(ButtonStyle.Danger)
             );
-            await judicialChannel.send({
+            const reviewMessage = await judicialChannel.send({
                 embeds: [reviewEmbed],
                 components: [row]
             });
+
+            await WarrantCase.updateOne(
+                { channelId: channel.id },
+                {
+                    reviewMessageId: reviewMessage.id,
+                    reviewChannelId: judicialChannel.id
+                }
+            )
 
             await interaction.editReply({
                 content: `✅ Wniosek został złożony. Kanał: <#${channel.id}>`

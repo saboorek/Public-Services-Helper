@@ -133,7 +133,7 @@ export const appOrderSaleWarrantModal = {
                 )
                 .setTimestamp();
 
-            const reviewRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+            const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
                 new ButtonBuilder()
                     .setCustomId(`approve_${channel.id}`)
                     .setLabel('Zatwierdź')
@@ -144,10 +144,18 @@ export const appOrderSaleWarrantModal = {
                     .setStyle(ButtonStyle.Danger)
             );
 
-            await appOrderSaleChannel.send({
+            const reviewMessage = await appOrderSaleChannel.send({
                 embeds: [reviewEmbed],
-                components: [reviewRow]
+                components: [row]
             });
+
+            await WarrantCase.updateOne(
+                { channelId: channel.id },
+                {
+                    reviewMessageId: reviewMessage.id,
+                    reviewChannelId: appOrderSaleChannel.id
+                }
+            )
 
             await interaction.editReply({
                 content: `✅ Wniosek został złożony. Kanał: <#${channel.id}>`

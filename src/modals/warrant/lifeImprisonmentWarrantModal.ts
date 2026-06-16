@@ -140,10 +140,18 @@ export const lifeImprisonmentWarrantModal = {
                     .setStyle(ButtonStyle.Danger)
             );
 
-            await lifeImprisonmentChannel.send({
+            const reviewMessage = await lifeImprisonmentChannel.send({
                 embeds: [reviewEmbed],
-                components: [row],
+                components: [row]
             });
+
+            await WarrantCase.updateOne(
+                { channelId: channel.id },
+                {
+                    reviewMessageId: reviewMessage.id,
+                    reviewChannelId: lifeImprisonmentChannel.id
+                }
+            )
 
             await interaction.editReply({
                 content: `✅ Wniosek został złożony. Kanał: <#${channel.id}>`

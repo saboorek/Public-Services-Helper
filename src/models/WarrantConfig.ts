@@ -21,6 +21,7 @@ export interface IWarrantConfig extends Document {
         leaderFbiRoleId?: string | null;
         helperRoleId?: string | null;
         supervisorRoleId?: string | null;
+        superiorCourtRoleId?: string | null;
     }
 }
 
@@ -45,6 +46,7 @@ const WarrantConfigSchema = new Schema<IWarrantConfig>({
         leaderFbiRoleId: { type: String, default: null },
         helperRoleId: { type: String, default: null },
         supervisorRoleId: { type: String, default: null },
+        superiorCourtRoleId: { type: String, default: null },
   }
 })
 

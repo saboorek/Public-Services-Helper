@@ -161,10 +161,18 @@ export const surveillanceWarrantModal = {
                     .setStyle(ButtonStyle.Danger)
             );
 
-            await surveillanceChannel.send({
+            const reviewMessage = await surveillanceChannel.send({
                 embeds: [reviewEmbed],
                 components: [row]
             });
+
+            await WarrantCase.updateOne(
+                { channelId: channel.id },
+                {
+                    reviewMessageId: reviewMessage.id,
+                    reviewChannelId: surveillanceChannel.id
+                }
+            )
 
             await interaction.editReply({
                 content: `✅ Wniosek został złożony. Kanał: <#${channel.id}>`
