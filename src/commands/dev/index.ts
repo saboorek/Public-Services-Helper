@@ -3,6 +3,7 @@ import { Command } from "../../types/Command";
 import { DEVELOPERS } from "../../config/developers";
 import { syncRolesSubcommand } from "./syncRoles";
 import { evalSubcommand } from "./eval";
+import { testReportSubcommand } from "./testReport";
 
 const DevCommand: Command = {
     data: new SlashCommandBuilder()
@@ -10,7 +11,8 @@ const DevCommand: Command = {
         .setDescription('Komenda developerska.')
         .setDefaultMemberPermissions(0)
         .addSubcommand(syncRolesSubcommand.data)
-        .addSubcommand(evalSubcommand.data),
+        .addSubcommand(evalSubcommand.data)
+        .addSubcommand(testReportSubcommand.data),
 
     async execute(interaction: ChatInputCommandInteraction): Promise<void> {
         if (!DEVELOPERS.includes(interaction.user.id)) {
@@ -29,6 +31,9 @@ const DevCommand: Command = {
                 break;
             case 'eval':
                 await evalSubcommand.execute(interaction);
+                break;
+            case 'testreport':
+                await testReportSubcommand.execute(interaction);
                 break;
         }
     }

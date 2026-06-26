@@ -2,13 +2,11 @@ import {
     ModalSubmitInteraction,
     EmbedBuilder,
     MessageFlags,
-    PermissionFlagsBits,
-    ChannelType,
-    ActionRowBuilder
 } from "discord.js";
 import { sendToChannel } from "../utils/sendToChannel";
 import {logger} from "../utils/logger";
 import Zgp from '../models/Zgp';
+import GuildConfig from "../models/GuildConfig";
 
 export const addZgpModal = {
     customId: 'addZgpModal',
@@ -25,6 +23,21 @@ export const addZgpModal = {
             const userLink = interaction.fields.getTextInputValue('zgpUserLink');
             const mainGroup = interaction.fields.getTextInputValue('zgpMainGroup');
             const crimeLink = interaction.fields.getTextInputValue('zgpCrimeGroupLink');
+
+            const config = await GuildConfig.findOne({ guildId: interaction.guildId });
+            const databaseKey = zgpType.toLowerCase() as 'lea' | 'rescue';
+            const allowedLimit = config?.zgpLimits?.[databaseKey] ?? 0;
+
+            if (allowedLimit > 0) {
+                const currentCount = await Zgp.countDocuments({ guildId: interaction.guildId, zgpType });
+
+                if (currentCount >= allowedLimit) {
+                    await interaction.editReply({
+                        content: `⚠️ Nie można dodać wpisu. Osiągnięto maksymalny limit dla typu \`${zgpType}\` (${currentCount}/${allowedLimit}).`
+                    });
+                    return;
+                }
+            }
 
             await Zgp.create({
                 guildId: interaction.guildId,

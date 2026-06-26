@@ -9,6 +9,7 @@ import {
     ComponentType
 } from "discord.js";
 import Zgp from '../../models/Zgp'
+import GuildConfig from '../../models/GuildConfig'
 
 const PAGE_SIZE = 10;
 
@@ -27,6 +28,17 @@ export const listZgpSubcommand = {
             return;
         }
 
+        const config = await GuildConfig.findOne({ guildId: interaction.guildId });
+
+        const limitLea = config?.zgpLimits?.lea ?? 0;
+        const limitRescue = config?.zgpLimits?.rescue ?? 0;
+
+        const countLea = await Zgp.countDocuments({ guildId: interaction.guildId, zgpType: "LEA" });
+        const countRescue = await Zgp.countDocuments({ guildId: interaction.guildId, zgpType: "RESCUE" });
+
+        const leaLimitText = limitLea === 0 ? `\`${countLea}\` / Brak limitu` : `\`${countLea}\` / \`${limitLea}\``;
+        const rescueLimitText = limitRescue === 0 ? `\`${countRescue}\` / Brak limitu` : `\`${countRescue}\` / \`${limitRescue}\``;
+
         const totalPages = Math.ceil(allItems.length / PAGE_SIZE);
         let currentPage = 0;
 
@@ -34,7 +46,7 @@ export const listZgpSubcommand = {
             const start = page * PAGE_SIZE;
             const items = allItems.slice(start, start + PAGE_SIZE);
 
-            const description = items.map((item, i) => {
+            const entriesList = items.map((item, i) => {
                 const index = start + i + 1;
                 const date = new Date(item.createdAt).toLocaleDateString('pl-PL');
 
@@ -47,6 +59,13 @@ export const listZgpSubcommand = {
                     `👤 **Dodał:** <@${item.addedBy}> • 📅 **Data:** ${date}`
                 );
             }).join("\n\n---\n\n");
+
+            const description =
+                `📊 **Status wykorzystania limitów:**\n` +
+                `• Sloty **LEA:** ${leaLimitText}\n` +
+                `• Sloty **RESCUE:** ${rescueLimitText}\n\n` +
+                `====================================\n\n` +
+                entriesList;
 
             return new EmbedBuilder()
                 .setColor(0xf8ef0d)

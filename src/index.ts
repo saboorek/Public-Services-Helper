@@ -5,6 +5,7 @@ import { loadCommands } from "./handlers/commandHandler";
 import { connectDatabase } from "./config/database";
 import { loadModals } from "./handlers/modalHandler";
 import { loadButtons } from "./handlers/buttonHandler";
+import { initZgpAutoList } from "./tasks/zgpAutoList";
 
 (async () => {
     await connectDatabase();
@@ -12,6 +13,8 @@ import { loadButtons } from "./handlers/buttonHandler";
     await loadModals(client);
     await loadButtons(client);
     await loadCommands(client.commands);
+
+    initZgpAutoList(client);
 
     await client.login(process.env.TOKEN);
 })();
