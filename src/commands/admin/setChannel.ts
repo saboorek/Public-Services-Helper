@@ -27,6 +27,10 @@ export const setChannelSubcommand = {
                         {
                             name: '🔐 Admin',
                             value: 'adminChannel'
+                        },
+                        {
+                            name: '🔪 Zgody ZGP',
+                            value: 'zgpChannel'
                         }
                     )
             )
@@ -64,6 +68,9 @@ export const setChannelSubcommand = {
                     break;
                 case 'adminChannel':
                     config.adminChannelId = channel.id;
+                    break;
+                case 'zgpChannel':
+                    config.zgpChannelId = channel.id;
                     break;
             }
 

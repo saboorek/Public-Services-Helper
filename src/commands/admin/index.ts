@@ -2,8 +2,9 @@ import { SlashCommandBuilder, ChatInputCommandInteraction, PermissionFlagsBits, 
 import { Command } from "../../types/Command";
 import { setChannelSubcommand } from "./setChannel";
 import { mapRoleSubcommand } from "./mapRole";
-import {setDefaultRoleSubcommand} from "./setDefaultRole";
-import {showRoleSubcommand} from "./showRole";
+import { setDefaultRoleSubcommand } from "./setDefaultRole";
+import { showRoleSubcommand } from "./showRole";
+import { zgpLimitSubcommand } from "./zgpLimit";
 
 const adminCommand: Command = {
     data: new SlashCommandBuilder()
@@ -13,7 +14,8 @@ const adminCommand: Command = {
         .addSubcommand(setChannelSubcommand.data)
         .addSubcommand(showRoleSubcommand.data)
         .addSubcommand(setDefaultRoleSubcommand.data)
-        .addSubcommand(mapRoleSubcommand.data),
+        .addSubcommand(mapRoleSubcommand.data)
+        .addSubcommand(zgpLimitSubcommand.data),
     async execute(interaction: ChatInputCommandInteraction): Promise<void> {
         if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
             await interaction.reply({
@@ -36,6 +38,9 @@ const adminCommand: Command = {
                 break;
             case 'showrole':
                 await showRoleSubcommand.execute(interaction);
+                break;
+            case 'zgplimit':
+                await zgpLimitSubcommand.execute(interaction);
                 break;
         }
     }
