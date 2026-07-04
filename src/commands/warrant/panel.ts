@@ -62,7 +62,7 @@ export const panelSubcommand = {
                     .setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder()
                     .setCustomId('wiretap_warrant')
-                    .setLabel('☎️ Wiretap')
+                    .setLabel('☎️ Phone Number')
                     .setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder()
                     .setCustomId('lifeImprisonment_warrant')
