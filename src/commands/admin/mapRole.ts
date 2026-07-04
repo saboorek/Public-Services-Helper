@@ -45,7 +45,9 @@ export const mapRoleSubcommand = {
                 return;
             }
 
-            const targetRole = await targetGuild.roles.fetch(targetRoleId).catch(() => null);
+            const allRoles = await targetGuild.roles.fetch().catch(() => null);
+            const targetRole = allRoles ? allRoles.get(targetRoleId) : null;
+
             if (!targetRole) {
                 await interaction.editReply({
                     content: `❌ Rola o ID \`${targetRoleId}\` nie istnieje na serwerze **${targetGuild.name}**.`,
@@ -74,9 +76,12 @@ export const mapRoleSubcommand = {
             });
 
             if (interaction.guild) {
-                const members = await interaction.guild.members.fetch();
-                for (const [, member] of members) {
-                    await syncRoles(member.id, interaction.guildId!, interaction.client);
+                const targetMembers = await targetGuild.members.fetch();
+                for (const [, member] of targetMembers) {
+                    const mainMember = await interaction.guild.members.fetch(member.id).catch(() => null);
+                    if (mainMember) {
+                        await syncRoles(member.id, interaction.guildId!, interaction.client);
+                    }
                 }
             }
 
