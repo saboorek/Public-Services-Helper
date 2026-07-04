@@ -1,6 +1,8 @@
+
 import { Client } from "discord.js";
 import { logger } from '../utils/logger';
 import GuildConfig from '../models/GuildConfig';
+import RoleMapping from '../models/RoleMapping';
 import { syncRoles } from '../utils/syncRoles';
 import { checkWarrantReminders } from '../utils/warrantReminder';
 
@@ -16,17 +18,35 @@ export default {
 
             for (const config of configs) {
                 try {
-                    const guild = await client.guilds.fetch(config.guildId).catch(() => null);
-                    if (!guild) continue;
+                    const mainGuild = await client.guilds.fetch(config.guildId).catch(() => null);
+                    if (!mainGuild) continue;
 
-                    const members = await guild.members.fetch();
-                    logger.info(`🔄 Synchronizuję ${members.size} memberów na serwerze ${guild.name}...`);
+                    const mappings = await RoleMapping.find({ guildId: config.guildId });
+                    const targetGuildIds = [...new Set(mappings.map(m => m.targetGuildId))];
 
-                    for (const [, member] of members) {
-                        await syncRoles(member.id, config.guildId, client, true);
+                    const userIdsToSync = new Set<string>();
+
+                    for (const targetGuildId of targetGuildIds) {
+                        const targetGuild = await client.guilds.fetch(targetGuildId).catch(() => null);
+                        if (!targetGuild) continue;
+
+                        const targetMembers = await targetGuild.members.fetch();
+
+                        for (const [, member] of targetMembers) {
+                            const mainMember = await mainGuild.members.fetch(member.id).catch(() => null);
+                            if (mainMember) {
+                                userIdsToSync.add(member.id);
+                            }
+                        }
                     }
 
-                    logger.success(`✅ Synchronizacja zakończona dla serwera ${guild.name}`);
+                    logger.info(`🔄 Synchronizuję ${userIdsToSync.size} memberów na serwerze ${mainGuild.name}...`);
+
+                    for (const userId of userIdsToSync) {
+                        await syncRoles(userId, config.guildId, client, true);
+                    }
+
+                    logger.success(`✅ Synchronizacja zakończona dla serwera ${mainGuild.name}`);
                 } catch (err) {
                     logger.error(`❌ Błąd synchronizacji dla serwera ${config.guildId}: ${err}`);
                 }

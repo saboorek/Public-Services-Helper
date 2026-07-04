@@ -53,7 +53,7 @@ export async function syncRoles(userId: string, mainGuildId: string, client: Cli
                 .setDescription(`Role zostały nadane poprawnie dla <@${userId}>\n\n${lines.join("\n")}`)
                 .setTimestamp();
 
-            await sendToChannel(mainGuild, "logChannel", successEmbed);
+            //await sendToChannel(mainGuild, "logChannel", successEmbed);
         }
 
     } catch (error) {
