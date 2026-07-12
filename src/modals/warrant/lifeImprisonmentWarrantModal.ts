@@ -63,11 +63,31 @@ export const lifeImprisonmentWarrantModal = {
                 },
             ];
 
+            const roleIds = [
+                config.role?.daoRoleId,
+                config.role?.criminalDivisionRoleId,
+                config.role?.helperRoleId,
+                config.role?.supervisorRoleId,
+            ];
+
+            for (const roleId of roleIds) {
+                if (roleId) {
+                    permissionOverwrites.push({
+                        id: roleId,
+                        allow: [
+                            PermissionFlagsBits.ViewChannel,
+                            PermissionFlagsBits.SendMessages,
+                            PermissionFlagsBits.ReadMessageHistory
+                        ],
+                    });
+                }
+            }
+
             const channel = await interaction.guild!.channels.create({
                 name: `📄-dozywocie-${channelSafeName}`,
                 type: ChannelType.GuildText,
                 parent: config.warrants.categoryId,
-                permissionOverwrites: permissionOverwrites,
+                permissionOverwrites,
             });
 
             await WarrantCase.create({
