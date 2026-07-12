@@ -69,7 +69,7 @@ export const wiretapWarrantModal = {
             for (const roleId of roleIds) {
                 if (roleId) {
                     permissionOverwrites.push({
-                        od: roleId,
+                        id: roleId,
                         allow: [
                             PermissionFlagsBits.ViewChannel,
                             PermissionFlagsBits.SendMessages,

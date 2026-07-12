@@ -6,7 +6,6 @@ import { logger } from "../utils/logger";
 export default {
     name: "guildMemberUpdate",
     async execute(oldMember: GuildMember, newMember: GuildMember) {
-        // Sprawdź czy zmieniły się role
         const oldRoles = oldMember.roles.cache;
         const newRoles = newMember.roles.cache;
 
@@ -18,7 +17,6 @@ export default {
         if (!rolesChanged) return;
 
         try {
-            // Znajdź mappingi, gdzie ten serwer jest targetGuildId
             const mappings = await RoleMapping.find({ targetGuildId: newMember.guild.id });
             if (mappings.length === 0) return;
 
