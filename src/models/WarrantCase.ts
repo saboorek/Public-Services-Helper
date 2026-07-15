@@ -15,6 +15,7 @@ export interface IWarrantCase extends Document {
     reviewMessageId?: string | null;
     reviewChannelId?: string | null;
     reminded: boolean;
+    expiresAt?: Date | null;
 }
 
 const WarrantCaseSchema = new Schema<IWarrantCase>({
@@ -31,6 +32,7 @@ const WarrantCaseSchema = new Schema<IWarrantCase>({
     reviewMessageId: { type: String, default: null },
     reviewChannelId: { type: String, default: null },
     reminded: { type: Boolean, default: false },
+    expiresAt: { type: Date, default: null },
     createdAt: { type: Date, default: Date.now },
 });
 

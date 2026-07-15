@@ -120,10 +120,10 @@ export const denyWarrantModal = {
                     { id: interaction.guild!.id, deny: ["ViewChannel", "SendMessages"] }
                 ]);
 
-                setTimeout(async () => {
-                    await WarrantCase.deleteOne({ channelId }).catch(() => {});
-                    await warrantChannel.delete().catch(() => {});
-                }, 24 * 60 * 60 * 1000);
+                await WarrantCase.updateOne(
+                    { channelId },
+                    { expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) }
+                );
             }
 
             await interaction.editReply({ content: "❌ Wniosek został odrzucony." });
