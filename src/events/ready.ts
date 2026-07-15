@@ -1,10 +1,10 @@
-
 import { Client } from "discord.js";
 import { logger } from '../utils/logger';
 import GuildConfig from '../models/GuildConfig';
 import RoleMapping from '../models/RoleMapping';
 import { syncRoles } from '../utils/syncRoles';
 import { checkWarrantReminders } from '../utils/warrantReminder';
+import { checkExpiredWarrants} from "../utils/warrantExpiry";
 
 export default {
     name: "ready",
@@ -60,5 +60,11 @@ export default {
             await checkWarrantReminders(client);
         }, 12 * 60 * 60 * 1000);
         logger.info("🔄 Uruchomiono cykliczne sprawdzanie przypomnień o wnioskach (co 12h)");
+
+        await checkExpiredWarrants(client);
+        setInterval(async () => {
+            await checkExpiredWarrants(client);
+        }, 5 * 60 * 1000);
+        logger.info("🔄 Uruchomiono cykliczne sprawdzanie zamkniętych wniosków (co 5 min)");
     },
 };
