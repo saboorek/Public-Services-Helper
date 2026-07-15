@@ -15,7 +15,7 @@ const zgpCommand: Command = {
         .addSubcommand(checkZgpSubcommand.data),
 
     async execute (interaction: ChatInputCommandInteraction): Promise<void> {
-        if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+        if (!interaction.memberPermissions?.has(PermissionFlagsBits.KickMembers)) {
             await interaction.reply({
                 content: 'Nie posiadasz odpowiednich uprawnień do użycia tej komendy.',
                 flags: MessageFlags.Ephemeral
