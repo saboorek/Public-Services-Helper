@@ -14,13 +14,6 @@ const StrawmanCommand: Command = {
         .addSubcommand(removeStrawmanSubcommand.data),
 
     async execute(interaction: ChatInputCommandInteraction): Promise<void> {
-        if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
-            await interaction.reply({
-                content: 'Nie posiadasz odpowiednich uprawnień do użycia tej komendy.',
-                flags: MessageFlags.Ephemeral
-            })
-            return;
-        }
         const subcommand = interaction.options.getSubcommand();
 
         switch (subcommand) {
