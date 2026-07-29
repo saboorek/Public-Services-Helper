@@ -138,7 +138,16 @@ export const surveillanceWarrantModal = {
                 return;
             }
 
+            const rolesToMention = [
+                config.role?.daoRoleId ? `<@&${config.role?.daoRoleId}>` : null,
+                config.role?.criminalDivisionRoleId ? `<@&${config.role?.criminalDivisionRoleId}>` : null
+            ].filter(Boolean).join(' ');
+
             const reviewEmbed = new EmbedBuilder()
+                .setAuthor({
+                    name: interaction.user.displayName,
+                    iconURL: interaction.user.displayAvatarURL()
+                })
                 .setTitle('🛰️ Wniosek o nakaz na narzędzia inwigilacji')
                 .setDescription(`Nowy wniosek o nakaz na narzędzia inwigilacji od ${interaction.user.tag} (${interaction.user.id})`)
                 .setColor(EmbedColors.waiting)
@@ -162,9 +171,16 @@ export const surveillanceWarrantModal = {
             );
 
             const reviewMessage = await surveillanceChannel.send({
+                content: rolesToMention.length > 0 ? rolesToMention : undefined,
                 embeds: [reviewEmbed],
                 components: [row]
             });
+
+            setTimeout(async () => {
+                await reviewMessage.edit({
+                    content: ''
+                });
+            }, 1000);
 
             await WarrantCase.updateOne(
                 { channelId: channel.id },

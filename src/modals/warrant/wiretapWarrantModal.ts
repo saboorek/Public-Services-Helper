@@ -131,7 +131,16 @@ export const wiretapWarrantModal = {
                 return;
             }
 
+            const rolesToMention = [
+                config.role?.helperRoleId ? `<@&${config.role?.helperRoleId}>` : null,
+                config.role?.supervisorRoleId ? `<@&${config.role?.supervisorRoleId}>` : null,
+            ].filter(Boolean).join(' ');
+
             const reviewEmbed = new EmbedBuilder()
+                .setAuthor({
+                    name: interaction.user.displayName,
+                    iconURL: interaction.user.displayAvatarURL()
+                })
                 .setTitle('☎️ Wniosek o otrzymanie numeru telefonu')
                 .setColor(EmbedColors.waiting)
                 .addFields(
@@ -154,9 +163,16 @@ export const wiretapWarrantModal = {
             );
 
             const reviewMessage = await wiretapChannel.send({
+                content: rolesToMention.length > 0 ? rolesToMention : undefined,
                 embeds: [reviewEmbed],
                 components: [row]
             });
+
+            setTimeout(async () => {
+                await reviewMessage.edit({
+                    content: ''
+                });
+            }, 1000);
 
             await WarrantCase.updateOne(
                 { channelId: channel.id },

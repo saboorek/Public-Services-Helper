@@ -70,6 +70,26 @@ export const seizureWarrantModal = {
                 },
             ];
 
+            const roleIds = [
+                config.role?.daoRoleId,
+                config.role?.criminalDivisionRoleId,
+                config.role?.helperRoleId,
+                config.role?.supervisorRoleId,
+            ];
+
+            for (const roleId of roleIds) {
+                if (roleId) {
+                    permissionOverwrites.push({
+                        id: roleId,
+                        allow: [
+                            PermissionFlagsBits.ViewChannel,
+                            PermissionFlagsBits.SendMessages,
+                            PermissionFlagsBits.ReadMessageHistory
+                        ],
+                    });
+                }
+            }
+
             const channel = await interaction.guild!.channels.create({
                 name: `📄-vsw-${channelSafeName}`,
                 type: ChannelType.GuildText,
@@ -125,7 +145,16 @@ export const seizureWarrantModal = {
                 return;
             }
 
+            const rolesToMention = [
+                config.role?.daoRoleId ? `<@&${config.role?.daoRoleId}>` : null,
+                config.role?.criminalDivisionRoleId ? `<@&${config.role?.criminalDivisionRoleId}>` : null
+            ].filter(Boolean).join(' ');
+
             const reviewEmbed = new EmbedBuilder()
+                .setAuthor({
+                    name: interaction.user.displayName,
+                    iconURL: interaction.user.displayAvatarURL()
+                })
                 .setTitle('🚗 Wniosek o nakaz zajęcia pojazdu')
                 .setColor(EmbedColors.waiting)
                 .addFields(
@@ -149,9 +178,16 @@ export const seizureWarrantModal = {
             )
 
             const reviewMessage = await seizureChannel.send({
+                content: rolesToMention.length > 0 ? rolesToMention : undefined,
                 embeds: [reviewEmbed],
                 components: [row]
             });
+
+            setTimeout(async () => {
+                await reviewMessage.edit({
+                    content: ''
+                });
+            }, 1000);
 
             await WarrantCase.updateOne(
                 { channelId: channel.id },
