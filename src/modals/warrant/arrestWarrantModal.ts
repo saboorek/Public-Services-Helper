@@ -135,7 +135,16 @@ export const arrestWarrantModal = {
                 return;
             }
 
+            const rolesToMention = [
+                config.role?.daoRoleId ? `<@&${config.role?.daoRoleId}>` : null,
+                config.role?.criminalDivisionRoleId ? `<@&${config.role?.criminalDivisionRoleId}>` : null
+            ].filter(Boolean).join(' ');
+
             const reviewEmbed = new EmbedBuilder()
+                .setAuthor({
+                    name: interaction.user.displayName,
+                    iconURL: interaction.user.displayAvatarURL()
+                })
                 .setTitle('⛓️‍💥 Wniosek o nakaz aresztowania')
                 .setColor(EmbedColors.waiting)
                 .addFields(
@@ -158,9 +167,16 @@ export const arrestWarrantModal = {
             );
 
             const reviewMessage = await arrestChannel.send({
+                content: rolesToMention.length > 0 ? rolesToMention : undefined,
                 embeds: [reviewEmbed],
                 components: [row]
             });
+
+            setTimeout(async () => {
+                await reviewMessage.edit({
+                    content: ''
+                });
+            }, 1000);
 
             await WarrantCase.updateOne(
                 { channelId: channel.id },

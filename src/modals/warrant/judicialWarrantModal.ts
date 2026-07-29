@@ -135,7 +135,15 @@ export const judicialWarrantModal = {
                 return;
             }
 
+            const rolesToMention = [
+                config.role?.helperRoleId ? `<@&${config.role?.helperRoleId}>` : null,
+            ].filter(Boolean).join(' ');
+
             const reviewEmbed = new EmbedBuilder()
+                .setAuthor({
+                    name: interaction.user.displayName,
+                    iconURL: interaction.user.displayAvatarURL()
+                })
                 .setTitle('⚖️ Nakaz sądowy (IRS)')
                 .setColor(EmbedColors.waiting)
                 .setFields(
@@ -158,9 +166,16 @@ export const judicialWarrantModal = {
                     .setStyle(ButtonStyle.Danger)
             );
             const reviewMessage = await judicialChannel.send({
+                content: rolesToMention.length > 0 ? rolesToMention : undefined,
                 embeds: [reviewEmbed],
                 components: [row]
             });
+
+            setTimeout( async () => {
+               await reviewMessage.edit({
+                    content: '',
+                });
+            }, 1000);
 
             await WarrantCase.updateOne(
                 { channelId: channel.id },

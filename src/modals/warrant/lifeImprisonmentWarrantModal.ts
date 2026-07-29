@@ -137,7 +137,16 @@ export const lifeImprisonmentWarrantModal = {
                 return;
             }
 
+            const rolesToMention = [
+                config.role?.daoRoleId ? `<@&${config.role?.daoRoleId}>` : null,
+                config.role?.criminalDivisionRoleId ? `<@&${config.role?.criminalDivisionRoleId}>` : null
+            ].filter(Boolean).join(' ');
+
             const reviewEmbed = new EmbedBuilder()
+                .setAuthor({
+                    name: interaction.user.displayName,
+                    iconURL: interaction.user.displayAvatarURL()
+                })
                 .setTitle('⚰️ Wniosek o wyrok dożywotniego więzienia')
                 .setColor(EmbedColors.info)
                 .setFields(
@@ -161,9 +170,16 @@ export const lifeImprisonmentWarrantModal = {
             );
 
             const reviewMessage = await lifeImprisonmentChannel.send({
+                content: rolesToMention.length > 0 ? rolesToMention : undefined,
                 embeds: [reviewEmbed],
                 components: [row]
             });
+
+            setTimeout(async () => {
+                await reviewMessage.edit({
+                    content: ''
+                });
+            }, 1000);
 
             await WarrantCase.updateOne(
                 { channelId: channel.id },

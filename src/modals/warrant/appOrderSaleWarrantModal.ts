@@ -47,12 +47,12 @@ export const appOrderSaleWarrantModal = {
                 .replace(/\s+/g, '-')
                 .slice(0, 50);
 
-            const permissionOverwrites: any [] = [
+            const permissionOverwrites: any[] = [
                 {
                     id: interaction.guild!.id,
                     deny: [
                         PermissionFlagsBits.ViewChannel
-                    ],
+                    ]
                 },
                 {
                     id: interaction.user.id,
@@ -60,9 +60,28 @@ export const appOrderSaleWarrantModal = {
                         PermissionFlagsBits.ViewChannel,
                         PermissionFlagsBits.SendMessages,
                         PermissionFlagsBits.ReadMessageHistory
-                    ],
+                    ]
                 },
             ];
+
+            const roleIds = [
+                config.role?.superiorCourtRoleId,
+                config.role?.helperRoleId,
+                config.role?.supervisorRoleId,
+            ];
+
+            for (const roleId of roleIds) {
+                if (roleId) {
+                    permissionOverwrites.push({
+                        id: roleId,
+                        allow: [
+                            PermissionFlagsBits.ViewChannel,
+                            PermissionFlagsBits.SendMessages,
+                            PermissionFlagsBits.ReadMessageHistory
+                        ],
+                    });
+                }
+            }
 
             const channel = await interaction.guild!.channels.create({
                 name:`📄-f-aos-${channelSafeName}`,
@@ -120,7 +139,15 @@ export const appOrderSaleWarrantModal = {
                 return;
             }
 
+            const rolesToMention = [
+                config.role?.superiorCourtRoleId ? `<@&${config.role?.superiorCourtRoleId}>` : null,
+            ].filter(Boolean).join(' ');
+
             const reviewEmbed = new EmbedBuilder()
+                .setAuthor({
+                    name: interaction.user.displayName,
+                    iconURL: interaction.user.displayAvatarURL()
+                })
                 .setTitle('🪙 Wniosek o wydanie nakazu sprzedaży (IRS)')
                 .setColor(EmbedColors.waiting)
                 .addFields(
@@ -145,9 +172,16 @@ export const appOrderSaleWarrantModal = {
             );
 
             const reviewMessage = await appOrderSaleChannel.send({
+                content: rolesToMention.length > 0 ? rolesToMention : undefined,
                 embeds: [reviewEmbed],
                 components: [row]
             });
+
+            setTimeout(async () => {
+                await reviewMessage.edit({
+                    content: '',
+                });
+            }, 1000);
 
             await WarrantCase.updateOne(
                 { channelId: channel.id },
