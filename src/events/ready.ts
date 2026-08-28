@@ -5,6 +5,7 @@ import RoleMapping from '../models/RoleMapping';
 import { syncRoles } from '../utils/syncRoles';
 import { checkWarrantReminders } from '../utils/warrantReminder';
 import { checkExpiredWarrants } from "../utils/warrantExpiry";
+import { checkExpiredTickets } from "../utils/ticketExpiry";
 
 async function syncAllRoles(client: Client): Promise<void> {
     try {
@@ -72,6 +73,12 @@ export default {
             await checkExpiredWarrants(client);
         }, 5 * 60 * 1000);
         logger.info("🔄 Uruchomiono cykliczne sprawdzanie zamkniętych wniosków (co 5 min)");
+
+        await checkExpiredTickets(client);
+        setInterval(async () => {
+            await checkExpiredTickets(client);
+        }, 5 * 60 * 1000);
+        logger.info("🔄 Uruchomiono cykliczne sprawdzanie zamkniętych zgłoszeń (co 5 min)");
 
         logger.info("🔄 Uruchamiam synchronizację ról przy starcie...");
         syncAllRoles(client).catch(err => logger.error(`❌ Błąd synchronizacji ról: ${err}`));
