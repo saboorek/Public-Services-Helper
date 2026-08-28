@@ -16,8 +16,28 @@ export const setCategorySubcommand = {
                     .setRequired(true)
                     .addChoices(
                         {
-                            name: 'Centrum zgłoszeń graczy',
-                            value: 'playerSupport'
+                            name: 'Nowe zgłoszenia',
+                            value: 'newTickets'
+                        },
+                        {
+                            name: 'Zgłoszenia w realizacji',
+                            value: 'inProgressTickets'
+                        },
+                        {
+                            name: 'Zamknięte zgłoszenia',
+                            value: 'closedTickets'
+                        },
+                        {
+                            name: 'Wyjaśnienia',
+                            value: 'explanations'
+                        },
+                        {
+                            name: 'Dirty Cop',
+                            value: 'dirtyCop'
+                        },
+                        {
+                            name: 'Zgłoszenia IRS',
+                            value: 'irsTickets'
                         }
                     )
             )
@@ -50,12 +70,27 @@ export const setCategorySubcommand = {
             }
 
             switch (categoryType) {
-                case 'playerSupport':
-                    config.category.playerSupport = category.id;
+                case 'newTickets':
+                    config.category.newTickets = category.id;
+                    break;
+                case 'inProgressTickets':
+                    config.category.ongoingTickets = category.id;
+                    break;
+                case 'closedTickets':
+                    config.category.closedTickets = category.id;
+                    break;
+                case 'explanations':
+                    config.category.explanations = category.id;
+                    break;
+                case 'dirtyCop':
+                    config.category.dirtyCop = category.id;
+                    break;
+                case 'irsTickets':
+                    config.category.irsTickets = category.id;
                     break;
                 default:
                     await interaction.editReply({
-                        content: '❌ Nieznany typ kategorii.'
+                        content: '❌ Nieprawidłowy typ kategorii.'
                     });
                     return;
             }
@@ -63,7 +98,7 @@ export const setCategorySubcommand = {
             await config.save();
 
             const logEmbed = new EmbedBuilder()
-                .setTitle(`⚙️ Zaaktualizowano ustawienie kategorii`)
+                .setTitle(`⚙️ Zaktualizowano ustawienie kategorii`)
                 .setColor('#f8ef0d')
                 .setDescription(`Kategoria **${categoryType.replace('Category', '')}** została ustawiona na <#${category.id}> przez ${interaction.user.tag}.`)
                 .setFooter({text: interaction.user.tag, iconURL: interaction.user.displayAvatarURL()})

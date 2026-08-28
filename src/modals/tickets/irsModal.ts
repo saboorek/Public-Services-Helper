@@ -3,9 +3,7 @@ import {
     EmbedBuilder,
     MessageFlags,
     PermissionFlagsBits,
-    ChannelType,
-    ActionRowBuilder,
-    TextChannel, ButtonBuilder, ButtonStyle
+    ChannelType
 } from "discord.js";
 import { logger } from "../../utils/logger";
 import { EmbedColors } from "../../config/colors";
@@ -14,21 +12,20 @@ import { createTicketButtons } from "../../utils/ticketButtons";
 import TicketsConfig from "../../models/TicketsConfig";
 import TicketCase from "../../models/TicketCase";
 
-export const complaintModal = {
-    customId: 'complaintModal',
+export const irsModal = {
+    customId: 'irsModal',
 
-    async execute (interaction: ModalSubmitInteraction): Promise<void> {
-        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    async execute(interaction: ModalSubmitInteraction): Promise<void> {
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
 
         try {
+            const irsTargetNickname = interaction.fields.getTextInputValue('irsTargetNickname');
+            const irsApplicant = interaction.fields.getTextInputValue('irsApplicant');
+            const irsDescription = interaction.fields.getTextInputValue('irsDescription');
 
-            const complaintType = interaction.fields.getStringSelectValues('complaintTypeSelect')[0];
-            const complaintSubject = interaction.fields.getTextInputValue('complaintSubject');
-            const complaintDescription = interaction.fields.getTextInputValue('complaintDescription');
+            const config = await TicketsConfig.findOne({guildId: interaction.guildId});
 
-            const config = await TicketsConfig.findOne({ guildId: interaction.guildId });
-
-            if (!config?.category.newTickets) {
+            if (!config?.category.irsTickets) {
                 await interaction.editReply({
                     content: '❌ Kategoria ticketów nie została skonfigurowana. Użyj komendy `/tickets setcategory` aby ją ustawić.'
                 });
@@ -36,8 +33,8 @@ export const complaintModal = {
             }
 
             const userNick = (interaction.member as any)?.nickname
-            ?? interaction.user.globalName
-            ?? interaction.user.username;
+                ?? interaction.user.globalName
+                ?? interaction.user.username;
 
             const channelName = toChannelSafeName(userNick);
 
@@ -61,6 +58,7 @@ export const complaintModal = {
             const rolesIds = [
                 config.supportRoles.publicOrgManager,
                 config.supportRoles.publicOrgAssistant,
+                config.supportRoles.irsRole,
             ];
 
             for (const roleId of rolesIds) {
@@ -77,17 +75,20 @@ export const complaintModal = {
             }
 
             const channel = await interaction.guild!.channels.create({
-                name: `🆕-skarga-${channelName}`,
+                name: `💵〡irs-${channelName}`,
                 type: ChannelType.GuildText,
-                parent: config.category.newTickets,
-                permissionOverwrites,
-                topic: `Ticket skargi od ${interaction.user.tag} (${interaction.user.id})`,
+                parent: config.category.irsTickets,
+                permissionOverwrites: permissionOverwrites,
             });
 
             const channelEmbed = new EmbedBuilder()
-                .setTitle(`${complaintType} - ${complaintSubject}`)
-                .setColor(EmbedColors.denied)
-                .setDescription(`**Opis skargi:**\n${complaintDescription}`)
+                .setTitle(`Wniosek o kontrolę majątku`)
+                .setColor(EmbedColors.info)
+                .addFields(
+                    { name: 'Imię i nazwisko osoby objętej wnioskiem:', value: `${irsTargetNickname}` },
+                    { name: 'Imię i nazwisko, stopień i agencja wnioskującego:', value: `${irsApplicant}` },
+                    { name: 'Uzasadnienie wniosku:', value: `${irsDescription}` },
+                )
                 .setFooter({ text: `Zgłoszenie od ${interaction.user.tag}`, iconURL: interaction.user.displayAvatarURL() })
                 .setTimestamp();
 
@@ -97,7 +98,7 @@ export const complaintModal = {
                 .join(' ');
 
             const controlMsg = await channel.send({
-                content: rolePings,
+                //content: rolePings,
                 embeds: [channelEmbed],
                 components: [createTicketButtons()]
             });
@@ -111,13 +112,11 @@ export const complaintModal = {
             });
 
             const infoMessage = [
-                `-# Stworzyłeś ticket ze skargą. Wszelkie informacje na temat skargi i dowody powinny być zamieszczone w wiadomości poniżej.`,
+                `-# Hej <@${interaction.user.id}>!`,
                 ``,
-                `-# Opiekunowie strefy zastrzegają sobie prawo do dodania do skragi liderów frakcji lub projektów, których dotyczy skarga, w celu wyjaśnienia sprawy.`,
+                `-# właśnie utworzyłeś wniosek o kontrolę majątku. Opisz dokładnie swoją sprawę uwzględniając wszystkie niezbędne informacje.`,
                 ``,
-                `-# Opiekunowie strefy zastrzegają sobie prawo do dodania liderów frakcji lub projektów oraz osoby, na którą skarga została złożona, w celu wyjaśnienia sprawy.`,
-                ``,
-                `-# Wszystkie screeny, nagrania i logi, które zostaną dodane mogą zostać wykorzystane w celu wyjaśnienia sprawy.`,
+                `-# Jeśli twoja sprawa została rozwiązana wpisz komendę \`/ticket close [powód]\` lub kliknij w poniższy przycisk "🔒 Zamknij".`,
             ].join('\n');
 
             await channel.send(infoMessage);
@@ -126,7 +125,7 @@ export const complaintModal = {
                 content: `✅ Twoje zgłoszenie zostało utworzone na kanale <#${channel.id}>.`
             });
         } catch (error) {
-            logger.error(`Error handling complaintModal: ${error}`);
+            logger.error(`Error handling irsModal: ${error}`);
             await interaction.editReply({
                 content: '❌ Wystąpił błąd podczas przetwarzania zgłoszenia. Spróbuj ponownie później.'
             })

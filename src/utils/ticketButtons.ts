@@ -4,11 +4,20 @@ export function createTicketButtons(): ActionRowBuilder<ButtonBuilder> {
     return new ActionRowBuilder<ButtonBuilder>().addComponents(
         new ButtonBuilder()
             .setCustomId('ticket_take')
-            .setLabel('Przejmij')
+            .setLabel('📌 Przyjmij')
             .setStyle(ButtonStyle.Success),
         new ButtonBuilder()
             .setCustomId('ticket_close')
-            .setLabel('Zamknij')
+            .setLabel('🔒 Zamknij')
+            .setStyle(ButtonStyle.Danger)
+    );
+}
+
+export function createCloseButton(): ActionRowBuilder<ButtonBuilder> {
+    return new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+            .setCustomId('ticket_close')
+            .setLabel('🔒 Zamknij')
             .setStyle(ButtonStyle.Danger)
     );
 }

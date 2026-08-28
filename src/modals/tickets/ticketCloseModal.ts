@@ -11,6 +11,7 @@ import { createTranscript } from "discord-html-transcripts";
 import TicketsConfig from "../../models/TicketsConfig";
 import { EmbedColors } from "../../config/colors";
 import { logger } from "../../utils/logger";
+import TicketCase from "../../models/TicketCase";
 
 export const ticketCloseModal = {
     customId: 'ticketCloseModal',
@@ -28,6 +29,10 @@ export const ticketCloseModal = {
             const withoutEmoji = parts.slice(1).join('-');
             const newChannelName = `🔒-${withoutEmoji}`;
             await channel.setName(newChannelName);
+
+            if (config?.category.closedTickets) {
+                await channel.setParent(config.category.closedTickets, { lockPermissions: false });
+            }
 
             await channel.permissionOverwrites.set([
                 { id: interaction.guild!.id, deny: ['ViewChannel', 'SendMessages'] }
@@ -72,33 +77,56 @@ export const ticketCloseModal = {
                 }
             }
 
-            const messages = await channel.messages.fetch({ limit: 20 });
-            const msgWithButtons = messages.find(m => m.components.length > 0 && m.author.bot);
-
-            if (msgWithButtons) {
-                const disabledRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-                    new ButtonBuilder()
-                        .setCustomId('ticket_take')
-                        .setLabel('Przejmij')
-                        .setStyle(ButtonStyle.Secondary)
-                        .setDisabled(true),
-                    new ButtonBuilder()
-                        .setCustomId('ticket_close')
-                        .setLabel('Zamknij')
-                        .setStyle(ButtonStyle.Secondary)
-                        .setDisabled(true)
-                );
-
-                await msgWithButtons.edit({ components: [disabledRow] });
+            // Wyłącz przyciski na oryginalnej wiadomości kontrolnej
+            const ticketCase = await TicketCase.findOne({ channelId: channel.id });
+            if (ticketCase?.controlMessageId) {
+                const controlMsg = await channel.messages.fetch(ticketCase.controlMessageId).catch(() => null);
+                if (controlMsg) {
+                    const disabledRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('ticket_take')
+                            .setLabel('Przejmij')
+                            .setStyle(ButtonStyle.Secondary)
+                            .setDisabled(true),
+                        new ButtonBuilder()
+                            .setCustomId('ticket_close')
+                            .setLabel('Zamknij')
+                            .setStyle(ButtonStyle.Secondary)
+                            .setDisabled(true)
+                    );
+                    await controlMsg.edit({ components: [disabledRow] });
+                }
             }
 
             await interaction.editReply({ content: '✅ Ticket został zamknięty.' });
 
-            setTimeout(async () => {
-                await channel.delete().catch(() => {});
-            }, 12 * 60 * 60 * 1000);
+            const deleteAt = new Date(Date.now() + 12 * 60 * 60 * 1000);
+            await TicketCase.findOneAndUpdate(
+                { channelId: channel.id },
+                { deleteAt },
+                { upsert: true }
+            );
 
             logger.success(`Ticket ${channel.name} zamknięty przez ${interaction.user.tag}`);
+
+            const actionEmbed = new EmbedBuilder()
+                .setColor(EmbedColors.denied)
+                .setTitle('⚠️ Ticket oczekuje na usunięcie')
+                .setDescription('Ticket zostanie automatycznie usunięty za **12 godzin**.\nMożesz go wcześniej usunąć lub ponownie otworzyć.')
+                .setTimestamp();
+
+            const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+                new ButtonBuilder()
+                    .setCustomId('ticket_reopen')
+                    .setLabel('🔓 Otwórz zgłoszenie')
+                    .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                    .setCustomId('ticket_delete')
+                    .setLabel('🗑️ Usuń')
+                    .setStyle(ButtonStyle.Danger)
+            );
+
+            await channel.send({ embeds: [actionEmbed], components: [actionRow] });
 
         } catch (error) {
             logger.error(`Błąd podczas zamykania ticketu: ${error}`);

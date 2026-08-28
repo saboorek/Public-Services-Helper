@@ -3,9 +3,7 @@ import {
     EmbedBuilder,
     MessageFlags,
     PermissionFlagsBits,
-    ChannelType,
-    ActionRowBuilder,
-    TextChannel, ButtonBuilder, ButtonStyle
+    ChannelType
 } from "discord.js";
 import { logger } from "../../utils/logger";
 import { EmbedColors } from "../../config/colors";
@@ -14,19 +12,17 @@ import { createTicketButtons } from "../../utils/ticketButtons";
 import TicketsConfig from "../../models/TicketsConfig";
 import TicketCase from "../../models/TicketCase";
 
-export const complaintModal = {
-    customId: 'complaintModal',
+export const publicOrgModal = {
+    customId: 'publicOrgModal',
 
-    async execute (interaction: ModalSubmitInteraction): Promise<void> {
-        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    async execute(interaction: ModalSubmitInteraction): Promise<void> {
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
 
         try {
 
-            const complaintType = interaction.fields.getStringSelectValues('complaintTypeSelect')[0];
-            const complaintSubject = interaction.fields.getTextInputValue('complaintSubject');
-            const complaintDescription = interaction.fields.getTextInputValue('complaintDescription');
+            const publicOrgDescription = interaction.fields.getTextInputValue('publicOrgDescription');
 
-            const config = await TicketsConfig.findOne({ guildId: interaction.guildId });
+            const config = await TicketsConfig.findOne({guildId: interaction.guildId});
 
             if (!config?.category.newTickets) {
                 await interaction.editReply({
@@ -36,8 +32,8 @@ export const complaintModal = {
             }
 
             const userNick = (interaction.member as any)?.nickname
-            ?? interaction.user.globalName
-            ?? interaction.user.username;
+                ?? interaction.user.globalName
+                ?? interaction.user.username;
 
             const channelName = toChannelSafeName(userNick);
 
@@ -77,17 +73,17 @@ export const complaintModal = {
             }
 
             const channel = await interaction.guild!.channels.create({
-                name: `🆕-skarga-${channelName}`,
+                name: `🆕-gracz-${channelName}`,
                 type: ChannelType.GuildText,
                 parent: config.category.newTickets,
-                permissionOverwrites,
-                topic: `Ticket skargi od ${interaction.user.tag} (${interaction.user.id})`,
+                permissionOverwrites: permissionOverwrites,
+                topic: `Wniosek do opiekunów strefy publicznej od ${interaction.user.tag} (${interaction.user.id})`
             });
 
             const channelEmbed = new EmbedBuilder()
-                .setTitle(`${complaintType} - ${complaintSubject}`)
-                .setColor(EmbedColors.denied)
-                .setDescription(`**Opis skargi:**\n${complaintDescription}`)
+                .setTitle('Zgłoszenie do opiekunów strefy publicznej')
+                .setDescription(`**Opis sprawy:**\n\`${publicOrgDescription}\``)
+                .setColor(EmbedColors.info)
                 .setFooter({ text: `Zgłoszenie od ${interaction.user.tag}`, iconURL: interaction.user.displayAvatarURL() })
                 .setTimestamp();
 
@@ -97,7 +93,7 @@ export const complaintModal = {
                 .join(' ');
 
             const controlMsg = await channel.send({
-                content: rolePings,
+                //content: rolePings,
                 embeds: [channelEmbed],
                 components: [createTicketButtons()]
             });
@@ -111,13 +107,11 @@ export const complaintModal = {
             });
 
             const infoMessage = [
-                `-# Stworzyłeś ticket ze skargą. Wszelkie informacje na temat skargi i dowody powinny być zamieszczone w wiadomości poniżej.`,
+                `-# Hej <@${interaction.user.id}>!`,
                 ``,
-                `-# Opiekunowie strefy zastrzegają sobie prawo do dodania do skragi liderów frakcji lub projektów, których dotyczy skarga, w celu wyjaśnienia sprawy.`,
+                `-# własnie stworzyłeś zgłoszenie z indywidualną sprawą do opiekunów strefy publicznej. Opisz dokładnie swoją sprawę uwzględniając niezbędne informacje.`,
                 ``,
-                `-# Opiekunowie strefy zastrzegają sobie prawo do dodania liderów frakcji lub projektów oraz osoby, na którą skarga została złożona, w celu wyjaśnienia sprawy.`,
-                ``,
-                `-# Wszystkie screeny, nagrania i logi, które zostaną dodane mogą zostać wykorzystane w celu wyjaśnienia sprawy.`,
+                `-# Jeśli twoja sprawa została rozwiązana wpisz komendę \`/ticket close [powód]\` lub kliknij w poniższy przycisk "🔒 Zamknij".`,
             ].join('\n');
 
             await channel.send(infoMessage);
@@ -126,7 +120,7 @@ export const complaintModal = {
                 content: `✅ Twoje zgłoszenie zostało utworzone na kanale <#${channel.id}>.`
             });
         } catch (error) {
-            logger.error(`Error handling complaintModal: ${error}`);
+            logger.error(`Error handling publicOrgModal: ${error}`);
             await interaction.editReply({
                 content: '❌ Wystąpił błąd podczas przetwarzania zgłoszenia. Spróbuj ponownie później.'
             })

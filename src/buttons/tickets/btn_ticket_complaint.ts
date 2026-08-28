@@ -48,7 +48,7 @@ export const complaintButton = {
             .setPlaceholder('Opisz czego dotyczy skarga. Szczegółowy opis i dowody załącz w oddzielnej wiadomości')
             .setStyle(TextInputStyle.Paragraph)
             .setRequired(true)
-            .setMaxLength(1024)
+            .setMaxLength(4000)
 
         const complaintDescriptionLabel = new LabelBuilder()
             .setLabel('Opis skargi:')

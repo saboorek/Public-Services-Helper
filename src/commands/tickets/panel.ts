@@ -25,7 +25,7 @@ export const panelSubcommand = {
                 .addChoices(
                     { name: '🤝 Centrum Zgłoszeń Graczy', value: 'playerSupport' },
                     { name: '📝 Wniosek oficjalny', value: 'officialRequest' },
-                    { name: '🔒 Nadzorczy', value: 'supervisory' }
+                    { name: '🔒 Panel wewnętrzny opiekunów', value: 'supervisory' }
                 )
             ),
 
@@ -110,17 +110,16 @@ export const panelSubcommand = {
                         .setStyle(ButtonStyle.Secondary)
                 )
 
-                await panelChannel.send({
-                    embeds: [embed],
-                    components: [row1, row2]
-                });
+                await panelChannel.send({ embeds: [embed], components: [row1, row2] });
+                await interaction.editReply({ content: `✅ Panel **Centrum Zgłoszeń Graczy** został pomyślnie wysłany na ${panelChannel}.` });
+
             } else if (type === 'officialRequest') {
                 const embed = new EmbedBuilder()
                     .setTitle("Wniosek oficjalny")
                     .setColor(EmbedColors.info)
-                    .setDescription('Wybierz jeden z poniższych przycisków, aby utowrzyć nowy ticket:\n' +
-                        '💰 Wniosek o kontrolę majątku (IRS) - Tworzy tikcet z wnioskiem o kontrolę majątku\n' +
-                        '📄 Report (na wniosek osób z sądu) - Tworzy ticket o uzyskanie linku do uniwersalnego raportu \n' +
+                    .setDescription('Wybierz jeden z poniższych przycisków, aby utowrzyć nowy ticket:\n\n' +
+                        '💰 Wniosek o kontrolę majątku (IRS) - Tworzy tikcet z wnioskiem o kontrolę majątku\n\n' +
+                        '📄 Report (na wniosek osób z sądu) - Tworzy ticket o uzyskanie linku do uniwersalnego raportu \n\n' +
                         '💼 Wniosek do instytucji publicznej - Tworzy ticket z wnioskiem do instytucji publicznej'
                     )
                     .setTimestamp()
@@ -137,24 +136,23 @@ export const panelSubcommand = {
                     new ButtonBuilder()
                         .setCustomId('btn_ticket_report')
                         .setLabel('📄 Report (na wniosek osób z sądu)')
-                        .setStyle(ButtonStyle.Secondary),
+                        .setStyle(ButtonStyle.Secondary)
+                        .setDisabled(true),
                     new ButtonBuilder()
                         .setCustomId('btn_ticket_public_institution')
                         .setLabel('💼 Wniosek do instytucji publicznej')
                         .setStyle(ButtonStyle.Success)
                 )
 
-                await panelChannel.send({
-                    embeds: [embed],
-                    components: [row]
-                });
+                await panelChannel.send({ embeds: [embed], components: [row] });
+                await interaction.editReply({ content: `✅ Panel **Wniosek oficjalny** został pomyślnie wysłany na ${panelChannel}.` });
 
             } else if (type === 'supervisory') {
                 const embed = new EmbedBuilder()
                     .setTitle("Panel wewnętrzny opiekunów")
                     .setColor(EmbedColors.info)
-                    .setDescription('Wybierz jeden z poniższych przycisków, aby utowrzyć nowy ticket:\n' +
-                        '👮 Dirty Cop - Tworzy kanał dla postaci Dirty Cop\n' +
+                    .setDescription('Wybierz jeden z poniższych przycisków, aby utowrzyć nowy ticket:\n\n' +
+                        '👮 Dirty Cop - Tworzy kanał dla postaci Dirty Cop\n\n' +
                         '💀 Dywanik - Tworzy ticket, zaciągający niesfornych graczy przed oblicze Opiekuna'
                     )
                     .setTimestamp()
@@ -169,14 +167,12 @@ export const panelSubcommand = {
                         .setLabel('👮 Dirty Cop')
                         .setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder()
-                        .setCustomId('btn_ticket_dywanik')
+                        .setCustomId('btn_ticket_disciplinary')
                         .setLabel('💀 Dywanik')
                         .setStyle(ButtonStyle.Secondary)
                 )
-                await panelChannel.send({
-                    embeds: [embed],
-                    components: [row]
-                });
+                await panelChannel.send({ embeds: [embed], components: [row] });
+                await interaction.editReply({ content: `✅ Panel **Panel wewnętrzny opiekunów** został pomyślnie wysłany na ${panelChannel}.` });
             }
         } catch {
 

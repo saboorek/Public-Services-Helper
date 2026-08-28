@@ -3,32 +3,29 @@ import {
     EmbedBuilder,
     MessageFlags,
     PermissionFlagsBits,
-    ChannelType,
-    ActionRowBuilder,
-    TextChannel, ButtonBuilder, ButtonStyle
+    ChannelType
 } from "discord.js";
 import { logger } from "../../utils/logger";
 import { EmbedColors } from "../../config/colors";
 import { toChannelSafeName} from "../../utils/channelName";
-import { createTicketButtons } from "../../utils/ticketButtons";
+import { createCloseButton } from "../../utils/ticketButtons";
 import TicketsConfig from "../../models/TicketsConfig";
 import TicketCase from "../../models/TicketCase";
+import tickets from "../../commands/tickets";
 
-export const complaintModal = {
-    customId: 'complaintModal',
+export const disciplinaryModal = {
+    customId: 'disciplinaryModal',
 
-    async execute (interaction: ModalSubmitInteraction): Promise<void> {
-        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    async execute(interaction: ModalSubmitInteraction): Promise<void> {
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
 
         try {
 
-            const complaintType = interaction.fields.getStringSelectValues('complaintTypeSelect')[0];
-            const complaintSubject = interaction.fields.getTextInputValue('complaintSubject');
-            const complaintDescription = interaction.fields.getTextInputValue('complaintDescription');
+            const disciplinaryDescription = interaction.fields.getTextInputValue('disciplinaryDescription');
 
-            const config = await TicketsConfig.findOne({ guildId: interaction.guildId });
+            const config = await TicketsConfig.findOne({guildId: interaction.guildId});
 
-            if (!config?.category.newTickets) {
+            if (!config?.category.explanations) {
                 await interaction.editReply({
                     content: '❌ Kategoria ticketów nie została skonfigurowana. Użyj komendy `/tickets setcategory` aby ją ustawić.'
                 });
@@ -36,8 +33,8 @@ export const complaintModal = {
             }
 
             const userNick = (interaction.member as any)?.nickname
-            ?? interaction.user.globalName
-            ?? interaction.user.username;
+                ?? interaction.user.globalName
+                ?? interaction.user.username;
 
             const channelName = toChannelSafeName(userNick);
 
@@ -77,29 +74,23 @@ export const complaintModal = {
             }
 
             const channel = await interaction.guild!.channels.create({
-                name: `🆕-skarga-${channelName}`,
+                name: `💀-wyjaśnienia-${channelName}`,
                 type: ChannelType.GuildText,
-                parent: config.category.newTickets,
-                permissionOverwrites,
-                topic: `Ticket skargi od ${interaction.user.tag} (${interaction.user.id})`,
+                parent: config.category.explanations,
+                permissionOverwrites: permissionOverwrites
             });
 
             const channelEmbed = new EmbedBuilder()
-                .setTitle(`${complaintType} - ${complaintSubject}`)
+                .setTitle('Wyjaśnienia')
+                .setDescription(`Oj nie fajnie.. I co żeś narobił? teraz będziesz mieć problem\n
+                **Opis sprawy:** \n\`${disciplinaryDescription}\``)
                 .setColor(EmbedColors.denied)
-                .setDescription(`**Opis skargi:**\n${complaintDescription}`)
-                .setFooter({ text: `Zgłoszenie od ${interaction.user.tag}`, iconURL: interaction.user.displayAvatarURL() })
+                .setFooter({ text: `System opresyjny dla graczy strefy publicznej`})
                 .setTimestamp();
 
-            const rolePings = rolesIds
-                .filter(roleId => roleId)
-                .map(roleId => `<@&${roleId}>`)
-                .join(' ');
-
             const controlMsg = await channel.send({
-                content: rolePings,
                 embeds: [channelEmbed],
-                components: [createTicketButtons()]
+                components: [createCloseButton()]
             });
 
             await TicketCase.create({
@@ -110,23 +101,17 @@ export const complaintModal = {
                 deleteAt: null,
             });
 
-            const infoMessage = [
-                `-# Stworzyłeś ticket ze skargą. Wszelkie informacje na temat skargi i dowody powinny być zamieszczone w wiadomości poniżej.`,
-                ``,
-                `-# Opiekunowie strefy zastrzegają sobie prawo do dodania do skragi liderów frakcji lub projektów, których dotyczy skarga, w celu wyjaśnienia sprawy.`,
-                ``,
-                `-# Opiekunowie strefy zastrzegają sobie prawo do dodania liderów frakcji lub projektów oraz osoby, na którą skarga została złożona, w celu wyjaśnienia sprawy.`,
-                ``,
-                `-# Wszystkie screeny, nagrania i logi, które zostaną dodane mogą zostać wykorzystane w celu wyjaśnienia sprawy.`,
+            const message = [
+                `https://images-ext-1.discordapp.net/external/IPRDh2bj-uTt7P3W8iL0hlsYZNe7woiNfWexqH_jntQ/https/media.tenor.com/aTljWQ18YeUAAAAd/rotating-skull.gif`
             ].join('\n');
 
-            await channel.send(infoMessage);
+            await channel.send(message);
 
             await interaction.editReply({
                 content: `✅ Twoje zgłoszenie zostało utworzone na kanale <#${channel.id}>.`
             });
         } catch (error) {
-            logger.error(`Error handling complaintModal: ${error}`);
+            logger.error(`Error handling disciplinaryModal: ${error}`);
             await interaction.editReply({
                 content: '❌ Wystąpił błąd podczas przetwarzania zgłoszenia. Spróbuj ponownie później.'
             })

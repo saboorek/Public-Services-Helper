@@ -50,6 +50,10 @@ export const takeButton = {
             const safeName = toChannelSafeName(userNick);
             await channel.setName(`🟢-${safeName}-${typePart}`);
 
+            if (config.category.ongoingTickets) {
+                await channel.setParent(config.category.ongoingTickets, { lockPermissions: false });
+            }
+
             const originalMessage = interaction.message;
             const disabledRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
                 new ButtonBuilder()

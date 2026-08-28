@@ -9,7 +9,7 @@ export const buttonClose = {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         try {
-            const config = await TicketsConfig.findOne({ guildId: interaction.guildId });
+            /*const config = await TicketsConfig.findOne({ guildId: interaction.guildId });
 
             const rolesIds = [
                 config?.supportRoles.publicOrgManager,
@@ -23,7 +23,7 @@ export const buttonClose = {
                 await interaction.editReply({ content: '❌ Nie masz uprawnień do zamknięcia tego ticketu.' });
                 return;
             }
-
+*/
             const confirmEmbed = new EmbedBuilder()
                 .setColor(EmbedColors.denied)
                 .setTitle('🔒 Zamknięcie ticketu')
